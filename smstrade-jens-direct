@@ -1,0 +1,21 @@
+#!/bin/bash
+
+myAPIkey=$(xargs <$HOME/bin/smstrade.key)
+
+if [ $# -lt 2 ]
+then
+	echo "usage: $0 <SMSto> <Text>"
+	exit 0
+fi
+
+# Lade Telefonnummern aus File +491771231231230
+myFrom=$(xargs </home/jcf/bin/phone-jens-phil.key)
+myFrom=$(xargs </home/jcf/bin/phone-jens.key)
+myTo="$1" ; shift
+
+myMessage=$(urlencode "$*" | tail -n 1 | awk '{print $NF}')
+
+#echo "https://gateway.smstrade.de/?key=${myAPIkey}&to=${myTo}&message=${myMessage}&route=direct&from=${myFrom}&message_id=1&cost=1&count=1&dlr=1"
+
+curl -s "https://gateway.smstrade.de/?key=${myAPIkey}&to=${myTo}&message=${myMessage}&route=direct&from=${myFrom}&message_id=1&cost=1&count=1&dlr=1"
+
