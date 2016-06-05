@@ -1,1 +1,41 @@
-/etc/gammu-smsdrc
+# Configuration file for Gammu SMS Daemon
+# Gammu library configuration, see gammurc(5)
+[gammu]
+device = /dev/serial/by-path/platform-3f980000.usb-usb-0:1.3.1:1.2-port0
+connection = at
+logfile = /var/log/gammu-smsd
+logformat = textalldate
+#use_locking =
+#gammuloc =
+gammucoding = utf8
+
+# SMSD configuration, see gammu-smsdrc(5)
+[smsd]
+CheckSecurity = 0
+PhoneID = PHIL-STICK
+#pin = 5883
+#pin =
+service = files
+#logfile = syslog
+logfile = /var/log/gammu-smsd
+# Increase for debugging information
+debuglevel = 4
+ReceiveFrequency = 15
+DeliveryReport = log
+#BackendRetries = 10
+RunOnReceive = /home/jcf/bin/gammu-receive
+#RunOnFailure = 
+#RunOnSent = 
+# Paths where messages are stored
+inboxpath = /var/spool/gammu/inbox/
+outboxpath = /var/spool/gammu/outbox/
+sentsmspath = /var/spool/gammu/sent/
+errorsmspath = /var/spool/gammu/error/
+InboxFormat = standard
+OutboxFormat = standard
+# Includes
+#IncludeNumbersFile =
+#ExcludeNumbersFile =
+#IncludeSMSCFile =
+#ExcludeSMSCFile =
+

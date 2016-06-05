@@ -1,1 +1,75 @@
-/home/jcf/bin/gammu-receive
+#!/bin/bash
+
+# So kommen die Daten rein:
+# Parameter: IN20160531_224833_00_+4917812345678_00.txt
+
+if [ $# -lt 1 ] ; then ( echo -n "Fehler: $0 - keine Parameter - " >&2 ; kill $$ ) ; fi
+
+myDebug=0
+
+# Phone Number from File +49...
+Receipient=$(xargs </home/jcf/bin/phone-jens.key)
+# eMail from File
+eMailTo=$(xargs </home/jcf/bin/email-jens.key)
+eMailFrom=$(xargs </home/jcf/bin/email-raspi.key)
+Senderfile='/home/jcf/bin/gammu-sender'
+Basedir='/var/spool/gammu/inbox'
+
+RAW=$(echo "$*")
+[[ $myDebug -eq 1 ]] && echo "### ${RAW}"
+Date=$(echo "${RAW}" | awk -F [_.] '{print $1}' | cut -c 3-)
+Time=$(echo "${RAW}" | awk -F [_.] '{print $2}')
+Count1=$(echo "${RAW}" | awk -F [_.] '{print $3}')
+Sender=$(echo "${RAW}" | awk -F [_.] '{print $4}')
+Count2=$(echo "${RAW}" | awk -F [_.] '{print $5}')
+CMDcount=${#}
+# Stamp: 20160531010000
+myStamp=$(date +%Y%m%d%H%M%S)
+
+#[[ ! -e ${Basedir}/$(basename ${RAW}) ]] && ( echo "Fehler: File not found ${RAW}" >&2 ; kill $$ )
+
+#Message="$(cat ${Basedir}/$(basename ${RAW}))"
+Message="$(for ID in "$@" ; do cat ${Basedir}/${ID} ; done)"
+
+rawSender=$(grep "^$(printf '%q' ${Sender});" ${Senderfile})
+
+SMSsender=$(awk -F ';' '{print $1}' <<<${rawSender})
+SMSto=$(awk -F ';' '{print $2}' <<<${rawSender})
+SMSfrom=$(awk -F ';' '{print $3}' <<<${rawSender} | tr -d ' ') ; SMSfrom=${SMSfrom:0:11}
+
+if [ ! -z "${SMSsender}" ]
+then
+	# Send Forwarded SMS via smstrade API
+	[[ ! -z "${SMSfrom}" ]] && SMSsender="${SMSfrom}"
+	myReply=$(/home/jcf/bin/smstrade-jens-direct-sender "${SMSsender}" "${SMSto}" "[SMSp/${Date}/(${myStamp:0:8}_${myStamp:8:6})/${CMDcount}] ${Message}")
+
+fi
+	( echo "Act-Date:     $(date +'%d.%m.%Y %H:%M:%S')"
+	  echo "Act-TimeZone: $(date +'%Z [UTC%:::z]')"
+	if [ ! -z "${SMSto}" ]
+	then
+	  if [ ! -z "${SMSfrom}" ]
+          then
+            echo "Act-From:     ${SMSfrom}"
+	  else
+	    echo "Act-Sender:   ${SMSsender}"
+	  fi
+	  echo "Act-To:       ${SMSto}"
+	fi
+	  echo''
+	  echo "SMS-Date:     ${Date:0:2}.${Date:2:2}.${Date:4:2}"
+	  echo "SMS-Time:     ${Time:0:2}:${Time:2:2}:${Time:4:2}"
+	  echo "SMS-Sender:   ${Sender}"
+	  echo "SMS-Parts:    ${CMDcount}"
+	  echo''
+	  if [ ! -z "${myReply}" ]
+	  then
+		echo "Reply:"
+		echo "${myReply}"
+		echo''
+	  fi
+	  echo "SMS-Message:"
+	  echo''
+	  echo "${Message}" ) | mail -s "SMSp[${Sender}]" "${eMailTo}"
+
+
