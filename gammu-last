@@ -1,0 +1,22 @@
+#!/bin/bash
+
+myName='gammu'
+myNumber='8'
+myLast=$(ls -1tr /var/spool/${myName}/inbox/ | tail -n ${myNumber} | xargs)
+
+myUnder="\033[4m"
+myBold="\033[1m"
+myNorm="\033[0m"
+myInvert="\033[7m"
+
+for myFile in ${myLast}
+do
+echo "# ${myFile}"
+date -d @$(stat -c %Z /var/spool/${myName}/inbox/${myFile})
+echo -ne ${myInvert}
+cat /var/spool/${myName}/inbox/${myFile}
+echo -ne ${myNorm}
+echo''
+echo''
+done
+

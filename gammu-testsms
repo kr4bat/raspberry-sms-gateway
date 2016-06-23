@@ -1,0 +1,11 @@
+#!/bin/bash
+
+myReceipient=$(xargs <$HOME/receipient.number)
+
+if [ "$(id -u)" != "0" ]; then
+        echo "Sorry, you are not root."
+        exit 1
+fi
+
+gammu-smsd-inject TEXT "${myReceipient}" -text 'Test SMS'
+
