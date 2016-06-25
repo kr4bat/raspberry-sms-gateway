@@ -22,3 +22,4 @@
 *.rdb
 log
 /.project
+Makefile
