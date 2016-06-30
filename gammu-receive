@@ -32,8 +32,8 @@ doLog $(date +%Y%m%d_%H%M%S) ${CMDcount} ${RAW}
 
 iRAW="$(basename ${RAW[0]})"
 Date=$(date -d @$(stat -c %Y ${Basedir}/${RAW[0]}) +%Y%m%d)
-Time=$(date -d @$(stat -c %Y ${Basedir}/${RAW[0]}) +%H%M%S)
-Number=$(awk -F [_.] '{print $2}' <<<${Basedir}/${RAW[0]})
+#Time=$(date -d @$(stat -c %Y ${Basedir}/${RAW[0]}) +%H%M%S)
+Time=$(awk -F [_.] '{print $2}' <<<${Basedir}/${RAW[0]})
 Count1=$(awk -F [_.] '{print $3}' <<<${Basedir}/${RAW[0]})
 Sender=$(awk -F [_.] '{print $4}' <<<${Basedir}/${RAW[0]})
 Count2=$(awk -F [_.] '{print $5}' <<<${Basedir}/${RAW[0]})
@@ -59,6 +59,7 @@ then
 	then
 		/home/jcf/bin/nma.sh "SMS GW PHIL" "${Sender} ${SMSfrom} ${Date:6:2}.${Date:4:2}.${Date:0:4} ${Time:0:2}:${Time:2:2}:${Time:4:2}" "${Message}" 0 | grep -v ^'\[ info \]'
 	else
+		/home/jcf/bin/nma.sh "SMS GW PHIL" "${Sender} ${SMSfrom} ${Date:6:2}.${Date:4:2}.${Date:0:4} ${Time:0:2}:${Time:2:2}:${Time:4:2}" "${Message}" 0 | grep -v ^'\[ info \]'
 		# Send Forwarded SMS via smstrade API
 		[[ ! -z "${SMSfrom}" ]] && SMSsender="${SMSfrom}"
 		myReply=$(/home/jcf/bin/smstrade-jens-direct-sender "${SMSsender}" "${SMSto}" "[SMSp/${Date}/$(date +%H%M%S)/(${Time})] ${Message}" | xargs | tr ' ' '_')
@@ -77,7 +78,7 @@ then
 	echo "Act-To:        ${SMSto}"
 fi
 echo''
-echo "SMS-Number:    ${Number}"
+#echo "SMS-Number:    ${Number}"
 echo "SMS-Date:      ${Date:6:2}.${Date:4:2}.${Date:0:4}"
 echo "SMS-Time:      ${Time:0:2}:${Time:2:2}:${Time:4:2}"
 echo "SMS-Sender:    ${Sender}"
